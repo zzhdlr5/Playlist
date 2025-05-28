@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎧 Spotify Playlist | Descubre Nuevos Ritmos</title>
+    <style>
+        /* Estilos generales y tema oscuro - Estilo Hacker */
+        body {
+            font-family: "Roboto Mono", "Courier New", monospace;
+            background-color: #1D0F2E; /* Morado oscuro para el fondo */
+            color: #E0E0E0; /* Un blanco ligeramente apagado para el texto general */
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden; 
+        }
+
+        /* Efecto Matrix de fondo */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; 
+            opacity: 0.4; /* Un poco más visible */
+        }
+
+        /* Contenedor principal */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative; 
+            z-index: 1;
+        }
+
+        /* Encabezado y banner - Estilo Hacker */
+        header {
+            padding: 20px 0; 
+            text-align: center;
+            background: linear-gradient(90deg, #3A005E, #5E008A, #3A005E); /* Tonos morados oscuros y violetas */
+            animation: fadeInDown 1s ease-out, backgroundPan 10s linear infinite alternate;
+            margin-bottom: 30px;
+            border-bottom: none; 
+            background-size: 200% 200%; 
+        }
+
+        .header-title {
+            font-size: 2.2em; /* Título un poco más pequeño */
+            color: #F0F0F0; /* Blanco brillante para el título del banner */
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0,0,0,0.6), 0 0 15px #8A2BE2; /* Sombra morada más pronunciada */
+            margin: 0;
+        }
+        
+        /* Títulos de secciones - Estilo Hacker */
+        h1, h2, h3 {
+            color: #8A2BE2; /* Morado principal para títulos */
+            text-shadow: 0 0 5px #8A2BE2; 
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        h1 { 
+            font-size: 2.8em;
+            text-align: center;
+            margin-top: 20px; 
+            margin-bottom: 20px;
+            color: #FFFFFF; /* Título principal en blanco para destacar sobre el fondo oscuro */
+        }
+         h1 span { /* Para el "Guía Interactiva:" */
+            color: #B39DDB; /* Un morado más claro */
+         }
+
+
+        h2 {
+            font-size: 2em;
+            border-bottom: 1px solid #5E008A; /* Borde con morado oscuro */
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        h3 {
+            font-size: 1.5em;
+            color: #A020F0; /* Un morado más claro para H3 */
+            margin-top: 25px;
+        }
+
+        /* Secciones - Estilo Hacker */
+        section {
+            background-color: rgba(40, 25, 60, 0.75); /* Fondo de sección morado oscuro translúcido */
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            border: 1px solid #4A148C; /* Borde morado más oscuro */
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.2); 
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        ul li::marker {
+            color: #8A2BE2; 
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 15px; 
+            margin-top: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .concept-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .concept-item {
+            background-color: rgba(60, 40, 80, 0.85); /* Morado más oscuro para items */
+            padding: 15px; 
+            border-radius: 6px;
+            border-left: 3px solid #A020F0; /* Borde lateral morado */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .concept-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4); /* Sombra morada más intensa al pasar el mouse */
+        }
+
+        .concept-item .icon, .section-icon { 
+            font-size: 1.2em; 
+            margin-right: 10px;
+            color: #DDA0DD; /* Morado claro para iconos */
+            display: inline-block; 
+            vertical-align: middle;
+        }
+        h2 .section-icon { font-size: 1.3em; }
+        h3 .section-icon { font-size: 1.1em; }
+
+        .code-block {
+            background-color: #100818; /* Fondo de bloque de código aún más oscuro */
+            color: #00FF00; /* Verde brillante para el código, estilo hacker */
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: "Courier New", monospace;
+            font-size: 0.9em;
+            border: 1px solid #5D3DAA; /* Borde morado */
+            margin-top: 15px;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+
+        .chart-container {
+            background-color: rgba(60, 40, 80, 0.85);
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow-x: auto; 
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 35px; /* Más espacio para el título del gráfico */
+            color: #F0F0F0;
+        }
+
+        .bar-chart {
+            display: flex;
+            justify-content: space-around; 
+            align-items: flex-end;
+            height: 220px; /* Aumentar altura para más espacio */
+            min-width: 450px; 
+            border-bottom: 1px solid #A020F0; /* Línea base morada */
+            padding-bottom: 80px; /* AUMENTADO para más espacio para etiquetas inferiores */
+        }
+
+        .bar {
+            width: 16%; 
+            min-width: 70px; 
+            text-align: center;
+            color: #FFFFFF;
+            position: relative;
+            animation: growBar 1.5s ease-out;
+            margin: 0 1%; 
+        }
+
+        .bar span { /* Etiqueta debajo de la barra */
+            position: absolute;
+            bottom: -70px; /* AUMENTADO para alejar MÁS la etiqueta de la barra */
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: normal; 
+            font-size: 0.75em; 
+            width: 100%; 
+            line-height: 1.2;
+        }
+        
+        .bar .value { /* Valor encima de la barra */
+            position: absolute;
+            top: -35px; /* AUMENTADO para alejar MÁS el valor de la barra */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em; 
+            font-weight: bold;
+        }
+
+        nav.main-nav {
+            background-color: rgba(45, 30, 65, 0.9); /* Morado oscuro para nav */
+            padding: 10px 0;
+            margin-bottom: 25px;
+            border-radius: 6px;
+            border: 1px solid #5D3DAA;
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
+        }
+        nav.main-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+        nav.main-nav ul li {
+            display: inline-block;
+            margin: 5px 10px;
+        }
+        nav.main-nav ul li a {
+            color: #D1C4E9; /* Morado pálido para enlaces de nav */
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        nav.main-nav ul li a:hover, nav.main-nav ul li a.active {
+            background-color: #A020F0; /* Morado principal al pasar/activo */
+            color: #FFFFFF;
+        }
+        
+        .quiz-item {
+            background-color: rgba(60, 40, 80, 0.85);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #8A2BE2; /* Borde morado */
+        }
+        .quiz-item p { margin-bottom: 10px; }
+        .quiz-item .answer {
+            display: none;
+            background-color: rgba(20,10,30,0.8); /* Fondo de respuesta más oscuro */
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #5D3DAA;
+            color: #00FF00; /* Verde brillante para respuestas */
+        }
+        .reveal-btn {
+            background-color: #A020F0; /* Botón morado */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: "Roboto Mono", monospace;
+            font-weight: bold;
+        }
+        .reveal-btn:hover {
+            background-color: #8A2BE2; /* Morado más oscuro al pasar */
+        }
+
+        .glossary dl {
+            margin-top: 15px;
+        }
+        .glossary dt {
+            font-weight: bold;
+            color: #DDA0DD; /* Morado claro para términos del glosario */
+            margin-top: 10px;
+        }
+        .glossary dt:before {
+            content: "🧠 "; /* Icono de cerebro para glosario */
+            color: #A020F0;
+        }
+        .glossary dd {
+            margin-left: 20px;
+            margin-bottom: 10px;
+            background-color: rgba(40, 30, 50, 0.7);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* Estilos para los elementos de playlist/podcast */
+        .playlist-item, .podcast-item {
+            display: flex;
+            justify-content: space-between; /* Distribuye el espacio entre los elementos */
+            align-items: center;
+            background-color: rgba(60, 40, 80, 0.85);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 3px solid #4caf50; /* Borde verde para podcast y playlist */
+            gap: 15px;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+        }
+
+        .playlist-item .name, .podcast-item .platform-name {
+            font-weight: bold;
+            color: #F0F0F0;
+            flex-grow: 1; /* Permite que el nombre ocupe el espacio disponible */
+            text-align: left; /* Alinea el texto a la izquierda */
+        }
+
+        .playlist-item .play-button, .podcast-item .play-button {
+            background-color: #4caf50; /* Verde para el botón de reproducción */
+            color: #1D0F2E; /* Texto oscuro para contraste */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-family: "Roboto Mono", monospace;
+            font-weight: bold;
+            text-decoration: none; /* Quitar subrayado del enlace */
+            display: inline-flex; /* Para alinear icono y texto */
+            align-items: center;
+            gap: 8px;
+            min-width: 150px; /* Ancho mínimo para los botones para simetría */
+            justify-content: center; /* Centra el contenido del botón */
+        }
+
+        .playlist-item .play-button:hover, .podcast-item .play-button:hover {
+            background-color: #3e8e41; /* Verde más oscuro al pasar el mouse */
+            transform: translateY(-2px);
+        }
+
+        .playlist-item .play-button .icon, .podcast-item .play-button .icon {
+            font-size: 1.2em;
+        }
+
+        /* Estilos para la sección de descarga de PDF */
+        .download-pdf-section {
+            text-align: center; /* Centra el contenido de la sección */
+            display: flex; /* Usar flexbox para alinear botones */
+            flex-direction: column; /* Apilar elementos verticalmente */
+            align-items: center; /* Centrar horizontalmente */
+            gap: 15px; /* Espacio entre los botones */
+        }
+
+        .download-button {
+            background-color: #4caf50; /* Verde para el botón de descarga */
+            color: #1D0F2E; /* Texto oscuro para contraste */
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-decoration: none; /* Quitar subrayado del enlace */
+            display: inline-flex; /* Para centrar y alinear icono/texto */
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); /* Sombra más suave para el botón */
+            width: fit-content; /* Ajustar ancho al contenido */
+        }
+
+        .download-button:hover {
+            background-color: #3e8e41; /* Verde más oscuro al pasar el mouse */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .download-button .icon {
+            font-size: 1.5em;
+        }
+
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes growBar {
+            from { height: 0; opacity: 0; }
+            to { opacity: 1; } 
+        }
+        
+        @keyframes backgroundPan {
+            0% { background-position: 0% center; }
+            100% { background-position: 100% center; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            h2 { font-size: 1.8em; }
+            h3 { font-size: 1.3em; }
+            .header-title { font-size: 2em; }
+            .container { padding: 15px; }
+            nav.main-nav ul li { display: block; margin: 8px 0; } 
+
+            .bar-chart { 
+                height: 200px; /* Ajustar para móvil si es necesario */
+                padding-bottom: 75px; /* Más espacio para etiquetas en móvil */
+            }
+            .bar span { 
+                font-size: 0.7em; 
+                bottom: -75px; /* Ajustar para móvil */
+            } 
+            .bar .value { 
+                font-size: 0.8em; 
+                top: -30px; /* Ajustar para móvil */
+            }
+            .playlist-item, .podcast-item {
+                flex-direction: column; /* Apilar elementos en pantallas pequeñas */
+                align-items: flex-start;
+            }
+            .playlist-item .name, .podcast-item .platform-name {
+                text-align: center; /* Centra el nombre en móvil si se apilan */
+                width: 100%; /* Ocupa todo el ancho disponible */
+                margin-bottom: 10px; /* Espacio entre el nombre y el botón */
+            }
+            .playlist-item .play-button, .podcast-item .play-button {
+                width: 100%; /* Botones ocupan todo el ancho en móvil */
+                min-width: unset; /* Elimina el ancho mínimo para adaptarse mejor */
+            }
+            .download-button {
+                width: 100%; /* Botón de descarga ocupa todo el ancho en móvil */
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body { font-size: 14px; }
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+            .header-title { font-size: 1.7em; }
+            .bar-chart { 
+                min-width: 100%; 
+                padding-bottom: 80px; 
+            }
+            .bar { min-width: 50px; } 
+            .bar span { 
+                font-size: 0.65em; 
+                bottom: -80px; 
+            }
+            .bar .value { 
+                font-size: 0.75em; 
+                top: -28px; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+
+    <header>
+        <h2 class="header-title">🎧 Spotify Playlist | Descubre Nuevos Ritmos <span class="section-icon">🎵</span></h2> </header>
+
+    <div class="container">
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#introduccion-portal">Introducción</a></li>
+                <li><a href="#playlists">Playlists</a></li>
+            </ul>
+        </nav>
+
+        <h1><span style="color: #B39DDB;">Bienvenido al Portal de Playlists</span></h1>
+
+        <section id="introduccion-portal">
+            <h2><span class="section-icon">✨</span> Descubre tu Próximo Ritmo Favorito</h2>
+            <p>Sumérgete en un universo de sonidos con nuestro exclusivo portal de playlists de Spotify. Aquí, hemos curado una selección de listas de reproducción para cada estado de ánimo y género, desde baladas melancólicas hasta ritmos de rap enérgicos y clásicos del rock. Explora, reproduce y déjate llevar por la música que define tus momentos.</p>
+            <p>Nuestra misión es facilitarte el acceso a nuevas experiencias musicales, conectándote con la banda sonora perfecta para tu día a día. ¡Prepárate para descubrir tus nuevos artistas y canciones favoritas!</p>
+        </section>
+
+        <section id="playlists">
+            <h2><span class="section-icon">🎶</span> Nuestras Playlists Destacadas</h2>
+            <div class="playlist-links">
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Playlist</span>
+                    <a href="https://open.spotify.com/playlist/6OD6AuCL7LeMAfTwmoi6Gd?si=5878d593e122497e" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Baladas Español</span>
+                    <a href="https://open.spotify.com/playlist/6wduHMMpFsGXsdGV45kfe2?si=77d0fd4ae9e945c3" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Baladas Ingles</span>
+                    <a href="https://open.spotify.com/playlist/2ggLsU3KiTUYatIpPpQLnU?si=f38d0b11556640a0" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Rap Español</span>
+                    <a href="https://open.spotify.com/playlist/11Oxud0GVkHAbK64DJq2ng?si=e08a017a4d54406b" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Rap Ingles</span>
+                    <a href="https://open.spotify.com/playlist/3OqSE0gy1hY5h4oZN3m1Zw?si=bfd64df3cdb34e11" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Rock Español</span>
+                    <a href="https://open.spotify.com/playlist/3UdzaPuteh8mwru9inHGKw?si=ee85936694c94d48" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Rock Ingles</span>
+                    <a href="https://open.spotify.com/playlist/5Dzv6qWLZy7U1Ec3EOnfsQ?si=b7915de0ff414f43" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Pop Español</span>
+                    <a href="https://open.spotify.com/playlist/1ynJcop9AanajWTABA2yKX?si=24e30efb0e124e6c" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Pop Ingles</span>
+                    <a href="https://open.spotify.com/playlist/6EwmOKwEDEtQPtktmF1lms?si=9177cacee82a472d" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Reggae Español</span>
+                    <a href="https://open.spotify.com/playlist/4YIdvepNp4nxWEAnLyiXoE?si=b13fdd47109f4159" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+                <div class="playlist-item">
+                    <span class="name">⬛️🟪zzh/Reggae Ingles</span>
+                    <a href="https://open.spotify.com/playlist/2kPPwM8GGwtcDZKqz3Py3V?si=6296b5e773994f03" target="_blank" class="play-button">
+                        <span class="icon">▶️</span> Escuchar
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Script para el efecto Matrix
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        let latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let nums = '0123456789';
+        let symbols = '$+¥£€<>{}[]|&*#@%?;:💡🕵️🎵'; // Símbolos relevantes para el portal de música añadidos
+
+        let characters = katakana + latin + nums + symbols;
+        characters = characters.split('');
+
+        const fontSize = 16; // Ligeramente más grande para visibilidad
+        let columns = Math.floor(canvas.width / fontSize); 
+
+        const drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        // Paleta de colores para Matrix (tonos morados y verdes brillantes)
+        const matrixColors = ['#4caf50', '#3e8e41', '#8A2BE2', '#A020F0', '#FFFFFF', '#E0E0E0'];
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(29, 15, 46, 0.05)'; // Fondo con desvanecimiento lento, tono morado oscuro
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = fontSize + 'px "Roboto Mono", "Courier New", monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                // Seleccionar un color aleatorio de la paleta para cada carácter
+                ctx.fillStyle = matrixColors[Math.floor(Math.random() * matrixColors.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) { 
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const newColumns = Math.floor(canvas.width / fontSize);
+            if (newColumns !== columns) { 
+                columns = newColumns;
+                drops.length = 0; 
+                for (let x = 0; x < columns; x++) {
+                    drops[x] = Math.floor(Math.random() * (canvas.height / fontSize)); 
+                }
+            }
+        });
+        
+        let matrixInterval = setInterval(drawMatrix, 50); // Ligeramente más lento para apreciar los colores
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // No hay barras de gráfico en esta versión, así que se puede eliminar el observador de intersección para barras
+            // const bars = document.querySelectorAll('.bar-chart .bar');
+            // const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+            // const observer = new IntersectionObserver((entries, observer) => {
+            //     entries.forEach(entry => {
+            //         if (entry.isIntersecting) {
+            //             const bar = entry.target;
+            //             const finalHeight = bar.style.getPropertyValue('height'); 
+            //             bar.style.height = '0%'; 
+            //             void bar.offsetWidth; 
+            //             bar.style.height = finalHeight; 
+            //             observer.unobserve(bar); 
+            //         }
+            //     });
+            // }, observerOptions);
+            // bars.forEach(bar => { observer.observe(bar); });
+        });
+
+        function toggleAnswer(button) {
+            const answerDiv = button.nextElementSibling;
+            if (answerDiv.style.display === 'none' || answerDiv.style.display === '') {
+                answerDiv.style.display = 'block';
+                button.textContent = 'Ocultar Respuesta';
+            } else {
+                answerDiv.style.display = 'none';
+                button.textContent = 'Mostrar Respuesta';
+            }
+        }
+
+        document.querySelectorAll('nav.main-nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    document.querySelectorAll('nav.main-nav a').forEach(link => link.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
